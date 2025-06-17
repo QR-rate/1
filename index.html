@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Değerlendirme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f2;
+        }
+        
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .star {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .star:hover, .star.active {
+            color: #FFD700;
+        }
+        
+        .star:hover ~ .star {
+            color: #e5e7eb;
+        }
+        
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
+        
+        .rating .star:hover ~ .star {
+            color: #e5e7eb;
+        }
+        
+        .rating:hover .star {
+            color: #e5e7eb;
+        }
+        
+        .rating .star:hover,
+        .rating .star:hover ~ .star {
+            color: #FFD700;
+        }
+        
+        .submit-btn, .ok-btn, .google-btn {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover, .ok-btn:hover, .google-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 126, 95, 0.3);
+        }
+        
+        .google-btn {
+            background: linear-gradient(135deg, #4285F4, #34A853);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col items-center py-12 px-4">
+        <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-amber-600 to-orange-500 p-8 text-center">
+                <h1 class="text-4xl font-bold text-white mb-2">Lezzet Köşesi</h1>
+                <p class="text-white text-opacity-90">Değerlendirmeniz bizim için önemli</p>
+            </div>
+            
+            <!-- Rating Section -->
+            <div class="p-8">
+                <div class="mb-8 text-center">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Deneyiminizi Değerlendirin</h2>
+                    
+                    <div class="rating mb-6" id="star-rating">
+                        <span class="star text-4xl px-1 text-gray-300" data-value="5">★</span>
+                        <span class="star text-4xl px-1 text-gray-300" data-value="4">★</span>
+                        <span class="star text-4xl px-1 text-gray-300" data-value="3">★</span>
+                        <span class="star text-4xl px-1 text-gray-300" data-value="2">★</span>
+                        <span class="star text-4xl px-1 text-gray-300" data-value="1">★</span>
+                    </div>
+                    
+                    <p class="text-gray-500 mb-4" id="rating-text">Lütfen puanınızı seçin</p>
+                </div>
+                
+                <div class="mb-6" id="review-section">
+                    <label for="review" class="block text-gray-700 font-medium mb-2">Yorumunuz</label>
+                    <textarea id="review" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none" placeholder="Deneyiminizi bizimle paylaşın..."></textarea>
+                </div>
+                
+                <div class="flex justify-center">
+                    <button id="submit-review" class="submit-btn text-white font-medium py-3 px-8 rounded-full">
+                        Değerlendirmeyi Gönder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Thank You Modal -->
+    <div id="thank-you-modal" class="modal-overlay">
+        <div class="modal-content bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="text-amber-500 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Değerlendirmeniz için Teşekkürler!</h3>
+                <p class="text-gray-600 mb-6">Görüşleriniz bizim için çok değerli. Hizmet kalitemizi sürekli geliştirmek için değerlendirmenizi dikkate alacağız.</p>
+                <button id="ok-button" class="ok-btn text-white font-medium py-3 px-8 rounded-full">
+                    Tamam
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 5-Star Google Review Modal -->
+    <div id="google-review-modal" class="modal-overlay">
+        <div class="modal-content bg-white p-8 rounded-xl shadow-xl max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="text-amber-500 mb-4">
+                    <div class="flex justify-center">
+                        <span class="text-4xl px-1 text-amber-400">★</span>
+                        <span class="text-4xl px-1 text-amber-400">★</span>
+                        <span class="text-4xl px-1 text-amber-400">★</span>
+                        <span class="text-4xl px-1 text-amber-400">★</span>
+                        <span class="text-4xl px-1 text-amber-400">★</span>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Harika! 5 Yıldız Verdiniz!</h3>
+                <p class="text-gray-600 mb-6">Değerlendirmenizi Google'da paylaşarak daha fazla kişiye ulaşmamıza yardımcı olabilirsiniz.</p>
+                <button id="google-button" class="google-btn text-white font-medium py-3 px-8 rounded-full">
+                    Google'da Değerlendir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star');
+            const ratingText = document.getElementById('rating-text');
+            const submitButton = document.getElementById('submit-review');
+            const reviewTextarea = document.getElementById('review');
+            const reviewSection = document.getElementById('review-section');
+            const thankYouModal = document.getElementById('thank-you-modal');
+            const googleReviewModal = document.getElementById('google-review-modal');
+            const okButton = document.getElementById('ok-button');
+            const googleButton = document.getElementById('google-button');
+            
+            const googleReviewUrl = "https://search.google.com/local/writereview?placeid=ChIJ9QJCMgjgn0ARTwxSoi0HUiI";
+            
+            let selectedRating = 0;
+            const ratingTexts = [
+                "",
+                "Kötü",
+                "Orta",
+                "İyi",
+                "Çok İyi",
+                "Mükemmel"
+            ];
+            
+            // Star rating functionality
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    selectedRating = value;
+                    
+                    // Update rating text
+                    ratingText.textContent = ratingTexts[value];
+                    
+                    // Reset all stars
+                    stars.forEach(s => s.classList.remove('active'));
+                    
+                    // Set active stars
+                    stars.forEach(s => {
+                        if (parseInt(s.getAttribute('data-value')) <= value) {
+                            s.classList.add('active');
+                        }
+                    });
+                    
+                    // If 5 stars selected, show Google review modal
+                    if (value === 5) {
+                        googleReviewModal.classList.add('active');
+                    }
+                });
+            });
+            
+            // Submit review
+            submitButton.addEventListener('click', function() {
+                if (selectedRating === 0) {
+                    alert('Lütfen bir puan seçin');
+                    return;
+                }
+                
+                // If 5 stars, we've already shown the Google modal
+                if (selectedRating === 5) {
+                    return;
+                }
+                
+                const reviewText = reviewTextarea.value.trim();
+                if (reviewText === '') {
+                    alert('Lütfen bir yorum yazın');
+                    return;
+                }
+                
+                // Show thank you modal for 1-4 stars
+                thankYouModal.classList.add('active');
+            });
+            
+            // OK button click
+            okButton.addEventListener('click', function() {
+                window.location.href = 'https://www.google.com';
+            });
+            
+            // Google review button click
+            googleButton.addEventListener('click', function() {
+                window.location.href = googleReviewUrl;
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9510c264d584a98c',t:'MTc1MDE0NDU2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
